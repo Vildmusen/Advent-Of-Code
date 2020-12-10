@@ -1,7 +1,7 @@
 from utils import *
 import time
 
-input = read_file_ints("day_10_input.txt")
+input = read_file_ints("inputs/day_10_input.txt")
 
 # Part 1
 def check_differences(sorted_input):
