@@ -1,7 +1,8 @@
 from utils import *
 import time
+import math
 
-input = read_file_strings("inputs/day_13_test.txt")
+input = read_file_strings("inputs/day_13_input.txt")
 
 # Part 1
 def check_busses_departures(cur_time, input):
@@ -21,53 +22,50 @@ def check_busses_part2(input):
     for i, row in enumerate(input.split(',')):
         if(row != 'x'):
             busses.append((i, row))
-    return check_chinese_mod(busses)
+    return find_t(busses)
 
 
-def mult_list(m_list):
-    ans = 1
-    for val in m_list:
-        ans *= int(val)
-    return ans
+def find_t(busses):
+    # Build mods and remainders
+    rems = []
+    mods = []
+    for rem, mod in busses:
+        rem -= int(mod)
+        while(rem > 0):
+            rem -= int(mod)
+        rems.append(abs(rem))
+        mods.append(int(mod))
+    rems[0] = 0
+    print(rems, mods, "\n")
 
+    # Initial values
+    all_good = False
+    count = 1
+    prev = 0
+    nr = 1
+    inc = 1
+    iterations = 0
 
-def check_chinese_mod(busses):
-    n = [int(bus[1]) for bus in busses]
-    a = [int(bus[0]) for bus in busses]
-
-    big_n = mult_list(n)
-    
-    z = []
-    y = []
-
-    for n_i in n:
-        y.append(big_n/n_i)
-
-    for i, val in enumerate(n):
-        res, m1, m2 =  gcd_extended(y[i], val)
-        z.append(y[i] + m2)
-
-    res = 0
-    for i, val in enumerate(a):
-        res += val * z[i] * y[i]
-    final = res % big_n
-
-    return n, a, y, z, res, final
-
-
-def gcd_extended(a, b):  
-    # Base Case  
-    if a == 0 :   
-        return b,0,1
-             
-    gcd,x1,y1 = gcd_extended(b % a, a)  
-    
-    # Update x and y using results of recursive  
-    # call
-    x = y1 - (b//a) * x1  
-    y = x1  
-     
-    return gcd,x,y 
+    # loop until t is found
+    while(not all_good):
+        all_good = True
+        for i, val in enumerate(rems):
+            if(count % mods[i] != val):
+                if(i > nr):
+                    if(prev != 0):
+                        inc = count - prev
+                        print(f"Found 2 chains of {nr}, increasing increment to: \n{count}-{prev} =", inc, "\n")
+                        prev = 0
+                        nr += 1
+                    else:
+                        prev = count
+                all_good = False
+                break
+        count += inc
+        iterations += 1
+        if(iterations % 10000000 == 0):
+            print(f"Progress: ({count})")
+    return count - inc
 
 
 starttime = time.perf_counter()
@@ -78,6 +76,7 @@ index = dep.index(min_wait)
 print((min_wait - int(input[0])) * bus[index])
 
 res = check_busses_part2(input[1])
-print(res)
+# res = fuck_it(input[1], 0)
+print(res, "was correct")
 
 print("Total execution time:", time.perf_counter() - starttime)
