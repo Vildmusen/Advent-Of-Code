@@ -1,9 +1,9 @@
 from utils import *
 import time
 
-input = read_file_strings("inputs/day_15_test.txt")
+input = read_file_strings("inputs/day_15_input.txt")
 
-def play1(input, length):
+def play(input, length):
     nr_arr = [int(nr) for nr in input[0].split(',')]
     nrs = len(nr_arr)
     while(nrs < length):
@@ -17,35 +17,30 @@ def play1(input, length):
     return nr_arr[length - 1]
 
 
-def play2(input, length):
-    nr_dict = {}
-    starting_nums = [int(val) for val in input[0].split(',')]
-    for pos, nr in enumerate(starting_nums):
-        nr_dict[int(nr)] = pos
-    nr_dict[0] = 0
-    last_spoken = starting_nums[-1]
-    temp = starting_nums[:-1]
-    cur_i = len(nr_dict) - 1
-    while(cur_i < length):
-        temp.append(last_spoken)
-        if(last_spoken in nr_dict):
-            if(nr_dict[last_spoken] != cur_i - 1):
-                last_pos = nr_dict[last_spoken]
-                last_spoken = cur_i - last_pos
-                nr_dict[last_spoken] = cur_i
-            else:
-                last_spoken = 0
+def play_fast(count, num, nr_dict, length):
+    wow_it_was_said_before = False
+    while(count < length - 1):
+        mem = nr_dict.get(num)
+        if(mem == None):
+            nr_dict[num] = count
+            num = 0
         else:
-            last_spoken = 0
-            nr_dict[last_spoken] = cur_i
-            
-        cur_i += 1
-    return temp
+            nr_dict.update({num:count})
+            num = count - mem
+        count += 1
+    return num
+
 
 starttime = time.perf_counter()
 print("Starting with:", input)
-res = play1(input, 2020)
+res = play(input, 2020)
 print(f"nr {res} is the 2020th!")
-res = play2(input, 2020)
+print("Time since start:", time.perf_counter() - starttime)
+
+nr_dict = {}
+for i, val in enumerate(input[0].split(",")[:-1]):
+    nr_dict[int(val)] = i
+num_arr = [int(val) for val in input[0].split(',')]
+res = play_fast(len(num_arr)-1, num_arr[-1:][0], nr_dict, 30000000)
 print(f"nr {res} is the 30000000th!")
 print("Total execution time:", time.perf_counter() - starttime)
